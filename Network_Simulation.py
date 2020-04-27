@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 # Created with Python 3.6
 """
-This code generates a directed network.
-A dynamical system in the form of an exchange of a quantity takes place on the network.
-The weights of the links in the network change randomly.
+This code generates a co-evolving network.
+An exchange of a quantity takes place on the network, while the weights of the links change randomly.
 """
 
 import pylab
 import matplotlib.pyplot as plt
 from matplotlib.patches import ArrowStyle
 import numpy as np
+from numpy import matlib as ml
 import networkx as nx
 import names
 import copy
@@ -92,7 +92,7 @@ def update_visualization(net, layout, name_list, quantities):
     # Update network visualization
     nx.draw(net, pos=layout, node_size=nodesizes, node_color=colors[0],
             edges=edges, width=linkwidths, edge_color=colors[1],
-            arrowstyle=arrow, arrowsize=.5,
+            arrowstyle=arrow, arrowsize=.5, connectionstyle='arc3,rad=0.2',
             with_labels='True', font_color=colors[2], font_size=NODE_FONT_SIZE)
 
     txt = 'Total Quantity ' + str(np.round(np.sum(quantities),2))
@@ -107,7 +107,7 @@ def network_dynamics(quantities, links):
     # Amount of quantity transferred to each node
     transfers = np.dot(quantities, links)
     # Amount of quantity lost at each node
-    quantities_rep = np.matlib.repmat(quantities, len(quantities), 1)
+    quantities_rep = ml.repmat(quantities, len(quantities), 1)
     losses = np.diagonal(np.dot(links, quantities_rep))
     # Merge losses & transfers
     #quantities = [quantities[n] - losses[n] + funcs[n](transfers[n]) for n in range(len(name_list))]
@@ -118,6 +118,7 @@ def network_dynamics(quantities, links):
     return quantities, links
 
 def flatten(links):
+
     # Flatten links matrix
     links_flat = []
     for lin in range(len(links)):
@@ -127,6 +128,7 @@ def flatten(links):
     return links_flat
 
 def limit_params(quantities, links_flat):
+
     # Constraining both the quantity and the link weights
     for params, boundaries in zip([quantities, links_flat], [[NODE_Q_MIN, NODE_Q_MAX], [LINK_W_MIN, LINK_W_MAX]]):
         for p in range(len(params)):
@@ -140,7 +142,6 @@ def limit_params(quantities, links_flat):
 
 
 if __name__ == "__main__":
-
     pylab.ion()
     fig = plt.figure(0, figsize=(16,8))
     fig.canvas.set_window_title('Propagation of a Quantity on a Dynamic Network')
